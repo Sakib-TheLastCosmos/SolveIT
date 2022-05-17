@@ -4,6 +4,8 @@ const model = (() => {
       current: {
          subject: '',
          totalQuestions: 0,
+         questionArray: [],
+         correctArray: [],
          correct: 0,
          incorrect: 0,
          isQuestionInitiated: false,
@@ -38,16 +40,17 @@ const model = (() => {
       localStorage.setItem('data', JSON.stringify(obj))
    }
 
-
-   if (localStorage.getItem('data')) {
-      const localData = JSON.parse(localStorage.getItem('data'))
+   const localData = JSON.parse(localStorage.getItem('data'))
+   if (localData && localData.overall.isCompleted) {
       data.overall = localData.overall
       // console.log(localData)
       data.nickname = localData.nickname
    } else {
       const obj = {
-         overall: {}
+         overall: data.overall,
+         nickname: data.nickname
       }
+      obj.overall.isCompleted = true
       localStorage.setItem('data', JSON.stringify(obj))
    }
 
@@ -118,32 +121,25 @@ const model = (() => {
       pickQuestion: (start, end) => {
          start = parseInt(start)
          end = parseInt(end)
-         let questionNo = start + Math.floor(Math.random() * (end - start + 1)) 
+
+         data.current.questionArray = new Array(end - (start - 1)).fill().map((d, i) => i + start);
+         
+         let questionArr = data.current.questionArray
+
+         questionArr = questionArr.filter( function( el ) {
+            return !data.current.correctArray.includes( el );
+         });
+         // console.log(questionArr, data.current.correctArray)
+          
+
+         let questionNo = questionArr[Math.floor(Math.random() * questionArr.length)]
          data.current.questionNo = questionNo
-
-         // if (data.overall[data.current.subject]) {
-         //    if (data.overall[data.current.subject].totalQuestions > -1) {
-         //       data.overall[data.current.subject].totalQuestions ++
-         //    } else {
-         //       data.overall[data.current.subject].totalQuestions = 0
-         //    }
-         // } else {
-         //    data.overall[data.current.subject] = {totalQuestions: 0}
-         // }
-
-         // if (data.current.totalQuestions > -1) data.current.totalQuestions ++
-         // else data.current.totalQuestions = 0
 
          if (!data.current.isQuestionInitiated) data.current.isQuestionInitiated = true
 
-         // if (data.overall.TotalQuestions > -1) data.overall.TotalQuestions ++
-         // else {
-         //    data.overall.TotalQuestions = 0
-         //    data.overall.TotalCorrect = 0
-         //    data.overall.TotalIncorrect = 0
-         // } 
+         if (questionNo) return questionNo
+         else return false
 
-         return questionNo
       },
 
       correctAnswerReceived: () => {
@@ -158,6 +154,10 @@ const model = (() => {
          data.current.correct ++
          data.overall.TotalCorrect ++
          data.overall[data.current.subject].correct ++
+
+         // console.log(data.current.questionNo)
+         data.current.correctArray.push(data.current.questionNo)
+         // console.log(data.current.correctArray)
 
 
          data.calculateSubjectProgress('current')
@@ -199,6 +199,21 @@ const model = (() => {
          updateLocalStorage()
       },
 
+      resetCurrentData: () => {
+         data.current = {
+            correct: 0,
+            correctArray: [],
+            incorrect: 0,
+            isQuestionInitiated: false,
+            questionArray: [],
+            streak: 0,
+            subject: data.current.subject,
+            subjectText: data.current.subjectText,
+            totalQuestions: 0,
+            wasPreviousCorrect: false
+         }
+      },
+
       getStat: (category) => {
          if(category == 'current') {
             return data.current
@@ -207,9 +222,9 @@ const model = (() => {
          }
       },
 
-      // getData: () => {
-      //    return data
-      // }
+      getData: () => {
+         return data
+      }
    }
 })()
 
@@ -255,14 +270,21 @@ const ui = (() => {
       subjectName: document.querySelector('.subject-name'),
 
       homeBtn: document.querySelector('#home_btn'),
-      deleteBtn: document.querySelector('#delete_btn')
+      deleteBtn: document.querySelector('#delete_btn'),
+
+      sessionTotalQuestions: document.querySelector('.session-total-question'),
+      sessionCorrect: document.querySelector('.session-correct'),
+      sessionIncorrect: document.querySelector('.session-incorrect'),
+      sessionAccuracy: document.querySelector('.session-accuracy'),
+      resetSessionBtn: document.querySelector('#reset-session__btn'),
    }
 
    const updatedDOM = () => {
       return {
          nextQuestionButtons: document.querySelectorAll('.next-question__btn'),
          correctBtn: document.querySelector('#correct_btn'),
-         incorrectBtn: document.querySelector('#incorrect_btn')   
+         incorrectBtn: document.querySelector('#incorrect_btn'),
+         resetSessionButtons: document.querySelectorAll('.reset-session__btn')   
       }
    }
 
@@ -318,21 +340,8 @@ const ui = (() => {
          DOM.correct2.textContent = data.TotalCorrect || 0
          DOM.incorrect2.textContent = data.TotalIncorrect || 0
 
-         // const progressArr = []
-         // subjects.forEach(cur => {
-         //    if (data[cur].correctPercentage) progressArr.push(data[cur].correctPercentage)
-         //    else progressArr.push(0)
-         // })
-         // console.log(progressArr)
-         // const max = Math.max(...progressArr)
-         // console.log(max)
-         // const maxIndex = progressArr.indexOf(max)
-
-         // const min = Math.min(...progressArr)
-         // const minIndex = progressArr.indexOf(min)
-
          let min = 100
-         let minItem;
+         let minItem = {}
          subjects.forEach(cur => {
             if (data[cur].totalQuestions > 9) {
                if (data[cur].correctPercentage < min) {
@@ -342,16 +351,11 @@ const ui = (() => {
                }
             }
          })
-         if (min >= 90) {
-            DOM.min.innerHTML = `You certainly do have a stunning preparation`
-         } else if (min < 90) {
-            DOM.min.innerHTML = `${subjectsText[subjects.indexOf(minItem.subject)]} <span class="progress-red">needs some improvement</span>`
-         }
 
          let max = 0
-         let maxItem;
+         let maxItem = {}
          subjects.forEach(cur => {
-            if (data[cur].totalQuestions > 9) {
+            if (data[cur].totalQuestions > 9 && data[cur].correctPercentage > 65) {
                if (data[cur].correctPercentage > max) {
                   max = data[cur].correctPercentage
                   maxItem = data[cur]
@@ -359,27 +363,25 @@ const ui = (() => {
                }
             }
          })
-         if (max > 65) {
+         // console.log(maxItem)
+
+
+         if (max > 65 && maxItem.subject != minItem.subject) {
+            DOM.max.innerHTML = `You are <span class="progress-blue">THE BEST</span> in ${subjectsText[subjects.indexOf(maxItem.subject)]}!`
+         } else if (max > 65 && minItem.subject == maxItem.subject && max > 80) {
             DOM.max.innerHTML = `You are <span class="progress-blue">THE BEST</span> in ${subjectsText[subjects.indexOf(maxItem.subject)]}!`
          } else {
             DOM.max.innerHTML = `Practice makes a man perfect! (Woman too)`
          }
 
 
-         // console.log(data[subjects[maxIndex]].totalQuestions, subjects[maxIndex])
-         // if (max > 65 && data[subjects[maxIndex]].totalQuestions > 9) {
-         //    DOM.max.innerHTML = `You are <span class="progress-blue">THE BEST</span> in ${subjectsText[maxIndex]}!`
-         // } else {
-         //    DOM.max.innerHTML = `Practice makes a man perfect! (Woman too)`
-         // }
-
-         // if (min > 90) {
-         //    DOM.min.innerHTML = `You certainly do have a stunning preparation`
-         // } else if (data[subjects[minIndex]].totalQuestions > 9) {
-         //    DOM.min.innerHTML = `${subjectsText[minIndex]} <span class="progress-red">needs some improvement</span>`
-         // } else {
-         //    DOM.min.innerHTML = `Which subject seems difficult to you?`
-         // }
+         if (min >= 90) {
+            DOM.min.innerHTML = `You certainly do have a stunning preparation`
+         } else if (min < 90 && minItem.subject != maxItem.subject) {
+            DOM.min.innerHTML = `${subjectsText[subjects.indexOf(minItem.subject)]} <span class="progress-red">needs some improvement.</span> Keep practicing~`
+         } else {
+            DOM.min.innerHTML = `Keep practicing to know your weak points~`
+         }
       },
 
 
@@ -455,6 +457,12 @@ const ui = (() => {
          } else {
             DOM.progress3.innerHTML = `<h4>Keep going~</h4>`
          }
+
+
+         DOM.sessionTotalQuestions.textContent = data.currentTotalQuestions
+         DOM.sessionCorrect.textContent = data.currentCorrect
+         DOM.sessionIncorrect.textContent = data.currentIncorrect
+         DOM.sessionAccuracy.textContent = Math.round((data.currentCorrect / data.currentTotalQuestions) * 100) || 'N/A'
       },
 
 
@@ -481,6 +489,7 @@ const ui = (() => {
          `
 
          DOM.questionNo.textContent =  0
+         DOM.questionNo.classList.remove('all-done-message')
          DOM.streakCont.innerHTML = streakMarkup
          DOM.buttonsCont.innerHTML = pickQuestionBtnMarkup
          DOM.skipBtn.style.display = 'none'
@@ -489,29 +498,46 @@ const ui = (() => {
 
 
       renderQuestionNo: (isQuestionInitiated, questionNo) => {
-         DOM.questionNo.textContent = questionNo
+         if (questionNo) {
+            DOM.questionNo.textContent = questionNo
+            DOM.questionNo.classList.remove('all-done-message')
 
-         const pickQuestionBtnMarkup = `
-         <button class="incorrect next-question__btn" id="incorrect_btn">
-            <span>Wrong</span>
-            
-            <svg>
-               <use href="./icons.svg#icon__cross"></use>
-            </svg>
-         </button>
+            const pickQuestionBtnMarkup = `
+            <button class="incorrect next-question__btn" id="incorrect_btn">
+               <span>Wrong</span>
+               
+               <svg>
+                  <use href="./icons.svg#icon__cross"></use>
+               </svg>
+            </button>
+   
+            <button class="correct next-question__btn" id="correct_btn" type="button">
+               <svg>
+                  <use href="./icons.svg#icon__check"></use>
+               </svg>
+   
+               <span>Correct</span>
+            </button>
+            `
+   
+            if (isQuestionInitiated && DOM.buttonsCont.innerHTML != pickQuestionBtnMarkup)  {
+               DOM.buttonsCont.innerHTML = pickQuestionBtnMarkup
+               DOM.skipBtn.style.display = 'inline'
+            }
+         } else {
+            DOM.questionNo.textContent = 'You are all done!'
+            DOM.questionNo.classList.add('all-done-message')
+            DOM.streakCont.style.display = 'none'
+            DOM.resetSessionBtn.style.display = 'none'
 
-         <button class="correct next-question__btn" id="correct_btn" type="button">
-            <svg>
-               <use href="./icons.svg#icon__check"></use>
-            </svg>
-
-            <span>Correct</span>
-         </button>
-         `
-
-         if (isQuestionInitiated && DOM.buttonsCont.innerHTML != pickQuestionBtnMarkup)  {
+            const pickQuestionBtnMarkup = `
+            <button class="reset-session__btn reset-session-question-cont__btn">
+               <span>Reset session</span>
+            </button>
+            `
+   
             DOM.buttonsCont.innerHTML = pickQuestionBtnMarkup
-            DOM.skipBtn.style.display = 'inline'
+            DOM.skipBtn.style.display = 'none'
          }
       }
    }
@@ -531,6 +557,8 @@ const controller = ((model, ui) => {
       const totalQuestions = model.getTotalQuestionsNo()
       // console.log(totalQuestions)
       setupNextQuestionEventListeners()
+      // console.log(questionNo)
+      if (!questionNo) setupResetSessionEventListeners()
    }
 
    const renderCont2 = () => {
@@ -538,6 +566,7 @@ const controller = ((model, ui) => {
       
       DOM.homeBtn.style.display = 'none'
       DOM.deleteBtn.style.display = 'inline'
+      DOM.resetSessionBtn.style.display = 'none'
 
       ui.renderName(model.getName(), DOM.name2)
 
@@ -553,19 +582,20 @@ const controller = ((model, ui) => {
          cur.addEventListener('click', e => {
             if (!cur.getAttribute('listener')) {
                cur.setAttribute('listener', true)
-               // console.log('a')
+
+               if (cur.id == 'correct_btn') {
+                  model.correctAnswerReceived()
+               } else if (cur.id == 'incorrect_btn') {
+                  model.incorrectAnswerReceived()
+               }
+
+
                const start = DOM.questionStartInput.value
                const end = DOM.questionEndInput.value
                if (start && end && (end > start)) {
                   generateQuestionCtrl(start, end)
                } else {
                   alert('Invalid range')
-               }
-   
-               if (cur.id == 'correct_btn') {
-                  model.correctAnswerReceived()
-               } else if (cur.id == 'incorrect_btn') {
-                  model.incorrectAnswerReceived()
                }
                
                updateSubjectGraph(model.getCurrentSubject(), model.getCurrentSubjectText())   
@@ -599,6 +629,8 @@ const controller = ((model, ui) => {
          incorrectPercentage: data.incorrectPercentage ,
          totalQuestions: data.totalQuestions,
          currentTotalQuestions: curData.totalQuestions,
+         currentCorrect: curData.correct,
+         currentIncorrect: curData.incorrect,
          streak: curData.streak,
          previousAccuracy: curData.previousAccuracy
       })
@@ -609,6 +641,7 @@ const controller = ((model, ui) => {
       DOM.questionPickCont.style.display = 'flex'
       DOM.homeBtn.style.display = 'inline'
       DOM.deleteBtn.style.display = 'inline'
+      DOM.resetSessionBtn.style.display = 'inline'
 
       model.updateCurrentData('subject', subject)
       model.updateCurrentData('subjectText', subjectText)
@@ -623,7 +656,29 @@ const controller = ((model, ui) => {
 
       updateSubjectGraph(subject, subjectText)
       setupNextQuestionEventListeners()
+      // console.log('a')
    }
+   
+
+   const resetSessionCtrl = () => {
+      model.resetCurrentData()
+
+      renderCont3(model.getCurrentSubject(), model.getCurrentSubjectText())
+   }
+
+   const setupResetSessionEventListeners = () => {
+      // console.log('aasf')
+      Array.from(ui.getUpdatedDOM().resetSessionButtons).forEach(cur => {
+         if (!cur.getAttribute('listener')) {
+            cur.addEventListener('click', () => {
+               resetSessionCtrl()
+            })
+            cur.setAttribute('listener', true)
+         }
+      })
+   }
+
+
 
    const initiateApp = () => {
       if (model.isProfileInitiated()) {
@@ -632,8 +687,6 @@ const controller = ((model, ui) => {
          ui.showCont(1)
       }
    }
-
-
 
    const setupEventListeners = () => {
       DOM.next1.addEventListener('click', e => {
@@ -681,10 +734,15 @@ const controller = ((model, ui) => {
             location.reload()
          }
       })
+
+      Array.from(ui.getUpdatedDOM().resetSessionButtons).forEach(cur => {
+         cur.addEventListener('click', () => {
+            resetSessionCtrl()
+         })
+      })
    }
 
-
-
+   
    return {
       init: () => {
          initiateApp()
@@ -693,4 +751,4 @@ const controller = ((model, ui) => {
    }
 })(model, ui).init()
 
-
+window.getData = model.getData()
