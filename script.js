@@ -364,6 +364,7 @@ const ui = (() => {
             }
          })
          // console.log(maxItem)
+         
 
 
          if (max > 65 && maxItem.subject != minItem.subject) {
@@ -590,11 +591,14 @@ const controller = ((model, ui) => {
                }
 
 
-               const start = DOM.questionStartInput.value
-               const end = DOM.questionEndInput.value
-               if (start && end && (end > start)) {
+               const start = parseInt(DOM.questionStartInput.value)
+               const end = parseInt(DOM.questionEndInput.value)
+               console.log(start, end)
+               if (start > 0 && end > 0 && (end > start)) {
+                  console.log('a')
                   generateQuestionCtrl(start, end)
                } else {
+                  console.log(start, end)
                   alert('Invalid range')
                }
                
@@ -607,9 +611,10 @@ const controller = ((model, ui) => {
       if (!DOM.skipBtn.getAttribute('listener')) {
          DOM.skipBtn.addEventListener('click', () => {
             DOM.skipBtn.setAttribute('listener', true) 
-            const start = DOM.questionStartInput.value
-            const end = DOM.questionEndInput.value
-            if (start && end && (end > start)) {
+            const start = parseInt(DOM.questionStartInput.value)
+            const end = parseInt(DOM.questionEndInput.value)
+            if (start > 0 && end > 0 && (end > start)) {
+               console.log(start, end)
                generateQuestionCtrl(start, end)
             } else {
                alert('Invalid range')
