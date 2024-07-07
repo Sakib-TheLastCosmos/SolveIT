@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="description" content="Check out this amazing website to make your journey towards the upcoming exam fun and interesting! This little site keeps track of your progress and stats, gives you tips and what not. Have fun!">
+   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/anilab-42c99.appspot.com/o/Yellow%20Illustrated%20Fairy%20Pencil%20Logo%20(4).png?alt=media&token=892e77ea-52b3-4734-a83d-fd681cb010d6" />
+   <title>SolveIT</title>
+   <link rel="stylesheet" href="style.css">
+   <link rel="icon" type="image/x-icon" href="https://drive.google.com/file/d/1IjappoEj_BRgwRR26xm99G0BQx6HBmnI/view?usp=sharing?">
+</head>
+<body>
+
+   <div class="container container-1 temp">
+      <h4>What's your nickname?</h4>
+      <form>
+         <input id="nickname" type="text" placeholder="Nickname">
+         <p>*You will not be able to change it later</p>
+   
+         <button class="next-1" type="submit">Next</button>   
+      </form>
+   </div>
+
+
+   <div class="container container-2 temp">
+      <div class="left__cont conts">
+         <div class="top">
+            <h3>I want to study: </h3>
+         </div>
+
+         <div class="middle">
+            <ul>
+               <li class="bangla-1">Bangla-1</li>
+               <li class="bangla-2">Bangla-2</li>
+
+               <li class="english-1">English-1</li>
+               <li class="english-2">English-2</li>
+
+               <li class="math">Math</li>
+               <li class="higher-math">Higher Math</li>
+
+               <li class="physics">Physics</li>
+               <li class="chemistry">Chemistry</li>
+               
+               <li class="biology">Biology</li>
+            </ul>
+         </div>
+
+         <div class="bottom">
+            <button class="pick-random-subject__btn">
+               <svg>
+                  <use href="./icons.svg#icon__pencil-post"></use>
+               </svg>
+
+               <span>Pick a random subject</span>
+            </button>
+         </div>
+      </div>
+
+
+
+      <div class="right__cont conts">
+         <div class="top">
+            <h4>HI USER!</h4>
+            <P>This is the statistics report of your progress in the subjects:</P>
+         </div>
+
+         <div class="middle">
+            <div class="graph__cont">
+               <div class="bangla-1 graph"></div>   
+               <div class="bangla-2 graph"></div>
+               <div class="english-1 graph"></div>
+               <div class="english-2 graph"></div>
+               <div class="math graph"></div>
+               <div class="higher-math graph"></div>
+               <div class="physics graph"></div>
+               <div class="chemistry graph"></div>
+               <div class="biology graph"></div>
+            </div>
+
+            <div class="stats__cont">
+               <div class="bangla-1 stat">
+                  <h4>Bangla-1</h4>
+                  <p></p><span>%</span>
+               </div>
+   
+               <div class="bangla-2 stat">
+                  <h4>Bangla-2</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="english-1 stat">
+                  <h4>English-1</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="english-2 stat">
+                  <h4>English-2</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="math stat">
+                  <h4>Math</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="higher-math stat">
+                  <h4>H. Math</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="physics stat">
+                  <h4>Physics</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="chemistry stat">
+                  <h4>Chemistry</h4>
+                  <p></p><span>%</span>
+               </div>
+
+               <div class="biology stat">
+                  <h4>Biology</h4>
+                  <p></p><span>%</span>
+               </div>
+            </div>
+
+            <div class="stat-report">
+               <div>
+                  <p>Overall accuracy:</p> <p class="overall-accuracy"></p><p>%</p>
+               </div>
+               <p>Total questions:</p> <p class="total-questions"></p>
+               <p>Correct:</p> <p class="correct"></p>
+               <p>Incorrect:</p> <p class="incorrect"></p>   
+            </div>
+         </div>
+
+         <div class="bottom">
+            <h4 class="max"></h4>
+            <h4 class="min"><h4>
+         </div>
+      </div>
+   </div>
+
+
+
+   
+   <div class="container container-3 temp">
+      <div class="left__cont conts">
+
+         <div class="top">
+            <h4 class="subject-name"></h4>
+            <p>Solve question number: </p>
+         </div>
+
+         <div class="middle">
+            <h3 id="question_no" class="question_no"></h3>
+
+            <div class="buttons">
+               <button id="incorrect_btn" class="incorrect next-question__btn">
+                  <span>Wrong</span>
+                  
+                  <svg>
+                     <use href="./icons.svg#icon__cross"></use>
+                  </svg>
+               </button>
+
+               <button id="correct_btn" class="correct next-question__btn" type="button">
+                  <svg>
+                     <use href="./icons.svg#icon__check"></use>
+                  </svg>
+
+                  <span>Correct</span>
+               </button>
+            </div>
+
+            <button class="skip__btn">Skip</button>
+         </div>
+
+         <div class="bottom">
+            <div class="waviy streak__cont">
+            </div>
+         </div>
+      </div>
+
+
+      <div class="right__cont conts">
+         <div class="top">
+            <h4>HI USER!</h4>
+            <P>Your stats in <strong class="subject-3"></strong>: </P>
+         </div>
+
+         <div class="middle">
+            <div class="graph__cont">
+               <div class="correct-graph graph"></div>   
+               <div class="incorrect-graph graph"></div>
+            </div>
+
+            <div class="stats__cont">
+               <div class="correct stat">
+                  <h4></h4>
+                  <p>Correct:</p> <p></p>
+               </div>
+   
+               <div class="incorrect stat">
+                  <h4></h4>
+                  <p>Incorrect:</p> <p></p>
+               </div>
+            </div>
+
+            <p>Total Questions: <span class="total-questions-3"></span></p>
+         </div>
+
+         <div class="session-stat">
+            <h4>This session:</h4>
+            <p>Total question: <span class="session-total-question"></span></p>
+            <p>Correct: <span class="session-correct"></span></p>
+            <p>Incorrect: <span class="session-incorrect"></span></p>
+            <p>Accuracy: <span class="session-accuracy"></span>%</p>
+         </div>
+
+         <div class="bottom">
+            <h4 style="opacity: 0;">Your accuracy today is </h4>
+         </div>
+      </div>
+   </div>
+
+   <div class="question-pick temp">
+      <p style="display: block;">Range:</p>
+      <input id="start" min="1" type="number" value="1" placeholder="From">
+      <input id="end" min="2" type="number" value="100" placeholder="To">   
+   </div>
+
+   <button id="reset-session__btn" class="temp reset-session__btn" title="Reset current session's data">Reset session</button>
+
+
+   <div class="icons">
+      <button title="Go to home" id="home_btn" class="temp">
+         <svg>
+            <use href="./icons.svg#icon__home"></use>
+         </svg>   
+      </button>
+
+      <button title="Erase all your data" id="delete_btn" class="temp">
+         <svg>
+            <use href="./icons.svg#icon__trash"></use>
+         </svg>
+      </button>
+
+      <figure>
+         <img src="./logo.png" alt="">
+      </figure>
+   </div>
+
+   <p id="watermark-name">Sakib UL Hasan</p>
+
+
+   <script src="script.js"></script>
+</body>
+</html>
